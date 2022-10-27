@@ -32,7 +32,6 @@ use poggit\virion\devirion\DEVirion;
 use function array_shift;
 use function array_slice;
 use function count;
-use function get_class;
 use function implode;
 use function in_array;
 use function intval;
@@ -174,7 +173,7 @@ abstract class DatabaseExecutorThread extends Thread{
 		$this->name = $name;
 	}
 
-	public function getThreadName() : string{
+	public function getThreadName(): string{
 		return $this->name;
 	}
 

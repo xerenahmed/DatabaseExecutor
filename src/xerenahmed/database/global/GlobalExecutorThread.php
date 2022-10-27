@@ -21,15 +21,9 @@ declare(strict_types=1);
 
 namespace xerenahmed\database\global;
 
-use GuzzleHttp\Promise\Promise;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use pocketmine\snooze\SleeperNotifier;
 use redmc\database\RedExecutorThread;
-use xerenahmed\database\DatabaseExecutorProvider;
-use xerenahmed\database\HandlerQueue;
-use function get_class;
 
 class GlobalExecutorThread extends RedExecutorThread{
 

@@ -21,14 +21,7 @@ declare(strict_types=1);
 
 namespace xerenahmed\database;
 
-use GuzzleHttp\Promise\Promise;
-use GuzzleHttp\Promise\Utils;
-use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
-use pocketmine\utils\SingletonTrait;
-use SOFe\AwaitGenerator\Await;
-use function is_string;
-use function usleep;
 
 interface DatabaseExecutorProviderInterface{
 	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread;
