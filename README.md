@@ -1,7 +1,6 @@
 # DatabaseExecutor
 
-DatabaseExecutor is a virion library for executing SQL queries asynchronously with **Laravel** **models** and **
-builders**. It's working since 3 months on a production server. It's not tested on sqlite, only on MySQL.
+DatabaseExecutor is a virion library for executing SQL queries asynchronously with **Laravel** **models** and **builders**. It's working since 3 months on a production server. It's not tested on sqlite, only on MySQL.
 
 ```php
 $builder = PlayerModel::username('xerenahmed');
