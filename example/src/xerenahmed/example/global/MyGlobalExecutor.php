@@ -13,7 +13,7 @@ use xerenahmed\database\HandlerQueue;
 class MyGlobalExecutor extends GlobalExecutor{
 	use DatabaseExecutorProvider;
 
-	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier) : DatabaseExecutorThread{
+	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread{
 		return new MyGlobalExecutorThread($handlerQueue, $notifier);
 	}
 }

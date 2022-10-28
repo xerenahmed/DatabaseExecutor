@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace xerenahmed\database;
 
+use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model;
@@ -54,14 +55,17 @@ abstract class DatabaseExecutorThread extends Thread{
 	/**
 	 * @throws \Exception
 	 */
-	public function onRun() : void{
+	public function onRun(): void{
 		\GlobalLogger::set($this->logger);
 		\GlobalLogger::get()->info($this->getName() . ' started');
-		$connection = $this->createConnection($this->dataPath);
+
+		$capsule = $this->createCapsule();
+		$connection = $capsule->getConnection();
+		$defaultConnection = $capsule->getDatabaseManager()->getDefaultConnection();
 
 		$resolver = new ConnectionResolver();
-		$resolver->addConnection('default', $connection);
-		$resolver->setDefaultConnection('default');
+		$resolver->addConnection($defaultConnection, $connection);
+		$resolver->setDefaultConnection($defaultConnection);
 		Model::setConnectionResolver($resolver);
 
 		$connection->enableQueryLog();
@@ -106,17 +110,17 @@ abstract class DatabaseExecutorThread extends Thread{
 		\GlobalLogger::get()->info($this->getName() . ' ended');
 	}
 
-	abstract public function createConnection() : Connection;
+	abstract public function createCapsule(): Manager;
 
 	/**
 	 * @param mixed[] $data
 	 */
-	abstract public function handle(Connection $connection, array $data) : mixed;
+	abstract public function handle(Connection $connection, array $data): mixed;
 
 	/**
 	 * @param \Closure[] $handlers
 	 */
-	public function fetchResults(array &$handlers) : void{
+	public function fetchResults(array &$handlers): void{
 		if($this->executor->count() < 1){
 			return;
 		}
@@ -148,21 +152,23 @@ abstract class DatabaseExecutorThread extends Thread{
 		}
 	}
 
-	public function getName() : string{
+	public function getName(): string{
 		return $this->name;
 	}
 
-	public function setName(string $name) : void{
+	public function setName(string $name): void{
 		$this->name = $name;
 	}
 
-	public function getThreadName() : string{
+	public function getThreadName(): string{
 		return $this->name;
 	}
 
-	protected function logError(int $id, \Exception $error) : void{
+	protected function logError(int $id, \Exception $error): void{
 		$errorLogMessage = "[{$this->logPrefix}] [Error] [$id] {$error->getMessage()}";
-		$isErrorImportant = $error instanceof QueryException && !in_array($error->getCode(), ["23000", "22003"], true); // duplicate entry, out of range value
+		$isErrorImportant = $error instanceof QueryException && !in_array($error->getCode(), [
+			"23000", "22003"
+		], true); // duplicate entry, out of range value
 		\GlobalLogger::get()->{$isErrorImportant ? 'error' : 'debug'}($errorLogMessage);
 	}
 
@@ -170,9 +176,9 @@ abstract class DatabaseExecutorThread extends Thread{
 	 * @param array{query: string, bindings: string[], time: string} $logData
 	 */
 	protected function log(
-		int    $index,
-		array  $logData
-	) : void{
+		int   $index,
+		array $logData
+	): void{
 		\GlobalLogger::get()->debug(
 			sprintf(
 				"[{$this->logPrefix}] [Execution] [$index] %s [%s] [%s ms]",
@@ -183,7 +189,7 @@ abstract class DatabaseExecutorThread extends Thread{
 		);
 	}
 
-	public function quit() : void{
+	public function quit(): void{
 		$this->queue->kill();
 		parent::quit();
 	}

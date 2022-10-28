@@ -13,11 +13,11 @@ use xerenahmed\database\HandlerQueue;
 class CustomExecutor implements DatabaseExecutorProviderInterface{
 	use DatabaseExecutorProvider;
 
-	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier) : DatabaseExecutorThread{
+	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread{
 		return new CustomExecutorThread($handlerQueue, $notifier);
 	}
 
-	public function createTables() : \Generator{
+	public function createTables(): \Generator{
 		return $this->createAsync("createTables");
 	}
 }

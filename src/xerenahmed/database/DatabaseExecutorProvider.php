@@ -30,14 +30,14 @@ trait DatabaseExecutorProvider{
 
 		Server::getInstance()
 			->getTickSleeper()
-			->addNotifier($notifier, function() : void{
+			->addNotifier($notifier, function(): void{
 				$this->readResults();
 			});
 		$this->handlerTask->start();
 		$this->isRunning = true;
 	}
 
-	protected function publish(\Closure $handler) : int{
+	protected function publish(\Closure $handler): int{
 		if(!$this->isRunning){
 			throw new \RuntimeException('Executor is not running');
 		}
@@ -47,9 +47,9 @@ trait DatabaseExecutorProvider{
 		return $id;
 	}
 
-	protected function createPromise(mixed ...$values) : Promise{
+	protected function createPromise(mixed ...$values): Promise{
 		$promise = new Promise();
-		$id = $this->publish(function(bool $status, $value) use ($promise) : void{
+		$id = $this->publish(function(bool $status, $value) use ($promise): void{
 			if($status){
 				$promise->resolve($value);
 			}else{
@@ -60,9 +60,9 @@ trait DatabaseExecutorProvider{
 		return $promise;
 	}
 
-	protected function createAsync(mixed ...$values) : \Generator{
-		return Await::promise(function($resolve, $reject) use ($values) : void{
-			$id = $this->publish(function(bool $status, $value) use ($resolve, $reject) : void{
+	protected function createAsync(mixed ...$values): \Generator{
+		return Await::promise(function($resolve, $reject) use ($values): void{
+			$id = $this->publish(function(bool $status, $value) use ($resolve, $reject): void{
 				if($status){
 					$resolve($value);
 				}else{
@@ -73,19 +73,19 @@ trait DatabaseExecutorProvider{
 		});
 	}
 
-	protected function readResults() : void{
+	protected function readResults(): void{
 		$this->handlerTask->fetchResults($this->handlers);
 		Utils::queue()->run();
 	}
 
-	public function waitAll() : void{
+	public function waitAll(): void{
 		while(!empty($this->handlers)){
 			$this->readResults();
 			usleep(1000);
 		}
 	}
 
-	public function stop() : void{
+	public function stop(): void{
 		$this->handlerTask->quit();
 		$this->isRunning = false;
 	}

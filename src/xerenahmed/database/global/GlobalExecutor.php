@@ -6,14 +6,15 @@ namespace xerenahmed\database\global;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use pocketmine\snooze\SleeperNotifier;
 use xerenahmed\database\DatabaseExecutorProvider;
 use xerenahmed\database\DatabaseExecutorProviderInterface;
-use xerenahmed\database\HandlerQueue;
 use function get_class;
 
+/**
+ * @mixin DatabaseExecutorProvider
+ */
 abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
-	public function get(Builder $builder) : \Generator{
+	public function get(Builder $builder): \Generator{
 		$modelClass = get_class($builder->getModel());
 
 		$collection = yield from $this->runBuilderMethod($builder, "get");
@@ -22,7 +23,7 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		});
 	}
 
-	public function first(Builder $builder) : \Generator{
+	public function first(Builder $builder): \Generator{
 		$modelClass = get_class($builder->getModel());
 
 		$values = yield from $this->runBuilderMethod($builder, "first");
@@ -33,28 +34,28 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return (new $modelClass())->fill((array) $values);
 	}
 
-	public function update(Builder $builder, array $values) : \Generator{
+	public function update(Builder $builder, array $values): \Generator{
 		return yield from $this->runBuilderMethod($builder, "update", [$values]);
 	}
 
-	public function delete(Builder $builder) : \Generator{
+	public function delete(Builder $builder): \Generator{
 		return yield from $this->runBuilderMethod($builder, "delete");
 	}
 
-	public function insert(Builder $builder, array $values) : \Generator{
+	public function insert(Builder $builder, array $values): \Generator{
 		return yield from $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
-	public function save(Model $model) : \Generator{
+	public function save(Model $model): \Generator{
 		$model->setConnection(null);
 		return yield from $this->createAsync("save", $model);
 	}
 
-	public function create(string $modelClass, array $attributes) : \Generator{
+	public function create(string $modelClass, array $attributes): \Generator{
 		return yield from $this->createAsync("create", $modelClass, [$attributes]);
 	}
 
-	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values) : \Generator{
+	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): \Generator{
 		$baseQuery = $builder->toBase();
 		$baseQuery->connection = null;
 

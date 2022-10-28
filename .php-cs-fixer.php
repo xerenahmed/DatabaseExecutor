@@ -1,7 +1,8 @@
 <?php
 
 $finder = PhpCsFixer\Finder::create()
-	->in(__DIR__ . '/src');
+	->in(__DIR__ . '/src')
+	->in(__DIR__ . '/example/src');
 
 return (new PhpCsFixer\Config)
 	->setRiskyAllowed(true)
@@ -10,6 +11,7 @@ return (new PhpCsFixer\Config)
 			'comment_type' => 'phpdocs_only'
 		],
 		'array_indentation' => true,
+		'trim_array_spaces' => true,
 		'array_syntax' => [
 			'syntax' => 'short'
 		],
@@ -76,7 +78,7 @@ return (new PhpCsFixer\Config)
 		'phpdoc_trim' => true,
 		'phpdoc_trim_consecutive_blank_line_separation' => true,
 		'return_type_declaration' => [
-			'space_before' => false
+			'space_before' => 'none'
 		],
 		'single_blank_line_at_eof' => true,
 		'single_import_per_statement' => true,

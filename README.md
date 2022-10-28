@@ -1,5 +1,5 @@
 # DatabaseExecutor
-DatabaseExecutor is a virion library for executing SQL queries asynchronously with **Laravel** **models** and **builders**. It's working for 3 months on a production server. It's not tested on SQLite, only on MySQL.
+DatabaseExecutor is a virion library for executing SQL queries asynchronously with **Laravel** **models** and **builders**. It's working for 3 months on a production server. Tested with MySQL and Sqlite.
 
 ```php
 // For example
@@ -26,6 +26,7 @@ composer require illuminate/database guzzlehttp/promises sof3/await-generator
 Download or clone repository and put it in your virions folder.
 
 ## Usage
+There is a example plugin for using DatabaseExecutor. You can find it in the `example` folder.
 
 ### Define a model
 
@@ -151,7 +152,7 @@ class Manager extends PluginBase{
 	public static ExecutorManager $executorManager;
 
 	public function onEnable(): void{
-		self::$executorManager = ExecutorManager::createWithGlobal();
+		self::$executorManager = ExecutorManager::create();
 		self::$executorManager->register(MoneyExecutor::getInstance());
 	}
 
@@ -161,22 +162,56 @@ class Manager extends PluginBase{
 }
 ```
 
+## Use models in main thread
+You should set connection resolver in main thread to use models in main thread. And specify the connection name in your model.
+
+```php
+$capsule = self::newCapsule();
+$capsule->setAsGlobal();
+
+$cr = new ConnectionResolver();
+$cr->addConnection("example", $capsule->getConnection());
+$cr->setDefaultConnection("example");
+Model::setConnectionResolver($cr);
+```
+
 ## Global Executor
 
 Global Executor is a singleton executor that can be used to execute queries without needing to create an executor
 instance.
-Useful for executing simple queries.
+Useful for executing simple queries. You should implement your own 'global' executor if you want to use it. Because it's must be unique per plugin.
 
+### Implement
 ```php
 use xerenahmed\database\global\GlobalExecutor;
-use xerenahmed\database\global\GlobalExecutorPromised;
+use xerenahmed\database\DatabaseExecutorProvider;
 
+class MyGlobalExecutor extends GlobalExecutor{
+	use DatabaseExecutorProvider;
+
+	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread{
+		return new MyGlobalExecutorThread($handlerQueue, $notifier);
+	}
+}
+
+use Illuminate\Database\Connection;
+use xerenahmed\database\global\GlobalExecutorThread;
+
+class MyGlobalExecutorThread extends GlobalExecutorThread{
+	public function createConnection(): Connection{
+		return Main::newCapsule($this->dataPath)->getConnection();
+	}
+}
+```
+
+### Usage after implementing
+```php
 Await::f2c(function(){
-    $result = yield from GlobalExecutor::getInstance()->first(PlayerModel::username('xerenahmed'));
+    $result = yield from MyGlobalExecutor::getInstance()->first(PlayerModel::username('xerenahmed'));
     echo "Found " . $result->username;
 });
 // or
-GlobalExecutorPromised::getInstance()->first(PlayerModel::username('xerenahmed'))
+MyGlobalExecutorPromised::getInstance()->first(PlayerModel::username('xerenahmed'))
     ->then(function(PlayerModel $player){
         echo $player->money;
     });

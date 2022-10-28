@@ -10,7 +10,7 @@ use xerenahmed\database\DatabaseExecutorThread;
 
 abstract class GlobalExecutorThread extends DatabaseExecutorThread{
 
-	public function handle(Connection $connection, array $data) : mixed{
+	public function handle(Connection $connection, array $data): mixed{
 		[$method, $object] = $data;
 
 		if ($method === "create") {

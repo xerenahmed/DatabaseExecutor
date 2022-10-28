@@ -7,15 +7,16 @@ namespace xerenahmed\database\global;
 use GuzzleHttp\Promise\Promise;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use pocketmine\snooze\SleeperNotifier;
 use xerenahmed\database\DatabaseExecutorProvider;
 use xerenahmed\database\DatabaseExecutorProviderInterface;
-use xerenahmed\database\HandlerQueue;
 use function get_class;
 
+/**
+ * @mixin DatabaseExecutorProvider
+ */
 abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterface {
 
-	public function get(Builder $builder) : Promise{
+	public function get(Builder $builder): Promise{
 		$modelClass = get_class($builder->getModel());
 
 		return $this->runBuilderMethod($builder, "get")->then(function($collection) use ($modelClass){
@@ -25,7 +26,7 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 		});
 	}
 
-	public function first(Builder $builder) : Promise{
+	public function first(Builder $builder): Promise{
 		$modelClass = get_class($builder->getModel());
 
 		return $this->runBuilderMethod($builder, "first")->then(function($values) use ($modelClass){
@@ -37,28 +38,28 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 		});
 	}
 
-	public function update(Builder $builder, array $values) : Promise{
+	public function update(Builder $builder, array $values): Promise{
 		return $this->runBuilderMethod($builder, "update", [$values]);
 	}
 
-	public function delete(Builder $builder) : Promise{
+	public function delete(Builder $builder): Promise{
 		return $this->runBuilderMethod($builder, "delete");
 	}
 
-	public function insert(Builder $builder, array $values) : Promise{
+	public function insert(Builder $builder, array $values): Promise{
 		return $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
-	public function save(Model $model) : Promise{
+	public function save(Model $model): Promise{
 		$model->setConnection(null);
 		return $this->createPromise("save", $model);
 	}
 
-	public function create(string $modelClass, array $attributes) : Promise{
+	public function create(string $modelClass, array $attributes): Promise{
 		return $this->createPromise("create", $modelClass, [$attributes]);
 	}
 
-	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values) : Promise{
+	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): Promise{
 		$baseQuery = $builder->toBase();
 		$baseQuery->connection = null;
 

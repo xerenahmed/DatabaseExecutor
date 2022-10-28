@@ -6,7 +6,8 @@
     "pocketmine/pocketmine-mp": "^4.0.0",
     "sof3/await-generator": "^3.4.2",
     "illuminate/database": "^9.25.1",
-    "guzzlehttp/promises": "^1.5"
+    "guzzlehttp/promises": "^1.5",
+    "ext-pthreads": "*"
   },
   "require-dev": {
     "phpstan/phpstan": "^1.8",

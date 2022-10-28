@@ -7,5 +7,9 @@ namespace xerenahmed\database;
 use pocketmine\snooze\SleeperNotifier;
 
 interface DatabaseExecutorProviderInterface{
-	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier) : DatabaseExecutorThread;
+	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread;
+
+	public function waitAll(): void;
+
+	public function stop(): void;
 }
