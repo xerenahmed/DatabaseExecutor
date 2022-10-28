@@ -16,7 +16,7 @@ GlobalExecutor::getInstance()->save($playerModel);
 ## Installation
 
 ### Install Dependencies
-DatabaseExecutor requires PHP 8 or later. It also requires the following extensions:
+DatabaseExecutor requires PHP 8 or later. It also requires the following packages:
 
 ```bash
 composer require illuminate/database:^9.37.0 sof3/await-generator:^3.4.2 guzzlehttp/promises:^1.5 
