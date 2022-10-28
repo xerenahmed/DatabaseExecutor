@@ -1,0 +1,12 @@
+parameters:
+  level: 9
+  paths:
+    - src
+    - example/src
+
+  ignoreErrors:
+    - '#Method .*? should return .*? but returns Illuminate\\Database\\Eloquent\\Builder\|\(Illuminate\\Database\\Eloquent\\Collection&iterable<Illuminate\\Database\\Eloquent\\Builder>\)\|Illuminate\\Database\\Eloquent\\Model\|null#'
+    #- '#\.*Model\|null but returns object\|null#'
+    - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\BelongsTo::where\(\)#'
+    - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\BelongsTo::first\(\)#'
+    - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany::delete\(\)#'

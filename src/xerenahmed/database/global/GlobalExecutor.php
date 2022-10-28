@@ -1,22 +1,5 @@
 <?php
 
-/*
- * ______         _ __  ___ ____
- * | ___ \       | |  \/  /  __ \
- * | |_/ /___  __| | .  . | /  \/
- * |    // _ \/ _` | |\/| | |
- * | |\ \  __/ (_| | |  | | \__/\
- * \_| \_\___|\__,_\_|  |_/\____/
- *
- * Copyright (C) RedMC Network, Inc - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- * Written by Eren Ahmet Akyol <ahmederen123@gmail.com>, 2022
- *
- * @author RedMC Team
- * @link https://www.redmc.me/
- */
-
 declare(strict_types=1);
 
 namespace xerenahmed\database\global;
@@ -29,14 +12,8 @@ use xerenahmed\database\DatabaseExecutorProviderInterface;
 use xerenahmed\database\HandlerQueue;
 use function get_class;
 
-class GlobalExecutor implements DatabaseExecutorProviderInterface{
-	use DatabaseExecutorProvider;
-
-	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): GlobalExecutorThread{
-		return new GlobalExecutorThread($handlerQueue, $notifier);
-	}
-
-	public function get(Builder $builder): \Generator{
+abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
+	public function get(Builder $builder) : \Generator{
 		$modelClass = get_class($builder->getModel());
 
 		$collection = yield from $this->runBuilderMethod($builder, "get");
@@ -45,7 +22,7 @@ class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		});
 	}
 
-	public function first(Builder $builder): \Generator{
+	public function first(Builder $builder) : \Generator{
 		$modelClass = get_class($builder->getModel());
 
 		$values = yield from $this->runBuilderMethod($builder, "first");
@@ -56,28 +33,28 @@ class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return (new $modelClass())->fill((array) $values);
 	}
 
-	public function update(Builder $builder, array $values): \Generator{
+	public function update(Builder $builder, array $values) : \Generator{
 		return yield from $this->runBuilderMethod($builder, "update", [$values]);
 	}
 
-	public function delete(Builder $builder): \Generator{
+	public function delete(Builder $builder) : \Generator{
 		return yield from $this->runBuilderMethod($builder, "delete");
 	}
 
-	public function insert(Builder $builder, array $values): \Generator{
+	public function insert(Builder $builder, array $values) : \Generator{
 		return yield from $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
-	public function save(Model $model): \Generator{
+	public function save(Model $model) : \Generator{
 		$model->setConnection(null);
 		return yield from $this->createAsync("save", $model);
 	}
 
-	public function create(string $modelClass, array $attributes): \Generator{
+	public function create(string $modelClass, array $attributes) : \Generator{
 		return yield from $this->createAsync("create", $modelClass, [$attributes]);
 	}
 
-	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): \Generator{
+	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values) : \Generator{
 		$baseQuery = $builder->toBase();
 		$baseQuery->connection = null;
 

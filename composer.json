@@ -1,0 +1,32 @@
+{
+  "name": "xerenahmed/database-executor",
+  "type": "project",
+  "license": "Apache-2.0",
+  "require": {
+    "pocketmine/pocketmine-mp": "^4.0.0",
+    "sof3/await-generator": "^3.4.2",
+    "illuminate/database": "^9.25.1",
+    "guzzlehttp/promises": "^1.5"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.8",
+    "phpunit/phpunit": "^9.5",
+    "friendsofphp/php-cs-fixer": "^3.10",
+    "sof3/pharynx": "0.2.2"
+  },
+  "autoload": {
+    "psr-0": {
+      "xerenahmed\\database\\": "src/"
+    }
+  },
+  "scripts": {
+    "cs": "php-cs-fixer fix",
+    "phpstan": "phpstan analyse"
+  },
+  "authors": [
+    {
+      "name": "xerenahmed",
+      "email": "eren@redmc.me"
+    }
+  ]
+}
