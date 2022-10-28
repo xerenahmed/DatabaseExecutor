@@ -46,6 +46,9 @@ class ExecutorManager{
 		self::$resolver->addConnection($name, $capsule->getConnection());
 	}
 
+	/**
+	 * @param array<string, mixed> $options
+	 */
 	public static function newCapsule(string $name, array $options): Manager{
 		$capsule = new Manager();
 		$capsule->addConnection($options, $name);

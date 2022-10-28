@@ -12,7 +12,6 @@ use Illuminate\Database\QueryException;
 use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\thread\Thread;
-use poggit\virion\devirion\DEVirion;
 use function array_shift;
 use function array_slice;
 use function count;
@@ -37,19 +36,9 @@ abstract class DatabaseExecutorThread extends Thread{
 		public SleeperNotifier $notifier
 	){
 		$this->executor = new \Threaded();
-		$server = Server::getInstance();
-		$this->dataPath = $server->getDataPath();
-		$this->logger = $server->getLogger();
+		$this->dataPath = Server::getInstance()->getDataPath();
+		$this->logger = Server::getInstance()->getLogger();
 		$this->name = parent::getThreadName();
-
-		$classLoaders = [$server->getLoader()];
-		$deVirion = $server
-			->getPluginManager()
-			->getPlugin('DEVirion');
-		if($deVirion instanceof DEVirion){
-			$classLoaders[] = $deVirion->getVirionClassLoader();
-		}
-		$this->setClassLoaders($classLoaders);
 	}
 
 	/**

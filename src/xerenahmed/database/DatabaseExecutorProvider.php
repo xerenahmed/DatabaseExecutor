@@ -47,7 +47,7 @@ trait DatabaseExecutorProvider{
 		return $id;
 	}
 
-	protected function createPromise(mixed ...$values): Promise{
+	public function createPromise(mixed ...$values): Promise{
 		$promise = new Promise();
 		$id = $this->publish(function(bool $status, $value) use ($promise): void{
 			if($status){
@@ -60,7 +60,7 @@ trait DatabaseExecutorProvider{
 		return $promise;
 	}
 
-	protected function createAsync(mixed ...$values): \Generator{
+	public function createAsync(mixed ...$values): \Generator{
 		return Await::promise(function($resolve, $reject) use ($values): void{
 			$id = $this->publish(function(bool $status, $value) use ($resolve, $reject): void{
 				if($status){
@@ -73,7 +73,7 @@ trait DatabaseExecutorProvider{
 		});
 	}
 
-	protected function readResults(): void{
+	public function readResults(): void{
 		$this->handlerTask->fetchResults($this->handlers);
 		Utils::queue()->run();
 	}
