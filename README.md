@@ -172,7 +172,7 @@ use xerenahmed\database\global\GlobalExecutor;
 use xerenahmed\database\global\GlobalExecutorPromised;
 
 Await::f2c(function(){
-    $result = yield from GlobalExecutorPromised::first(PlayerModel::username('xerenahmed'));
+    $result = yield from GlobalExecutor::getInstance()->first(PlayerModel::username('xerenahmed'));
     echo "Found " . $result->username;
 });
 // or
