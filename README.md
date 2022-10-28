@@ -4,7 +4,7 @@ DatabaseExecutor is a virion library for executing SQL queries asynchronously wi
 ```php
 // For example
 $query = PlayerModel::username('xerenahmed');
-$playerModel = GlobalExecutor::getInstance()->first($builder);
+$playerModel = GlobalExecutor::getInstance()->first($query);
 $playerModel->locale = 'en';
 GlobalExecutor::getInstance()->save($playerModel);
 ```
