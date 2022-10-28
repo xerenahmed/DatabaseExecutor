@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace xerenahmed\example;
 
 use Illuminate\Database\Capsule\Manager;
-use Illuminate\Database\ConnectionResolver;
-use Illuminate\Database\Eloquent\Model;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use Ramsey\Uuid\Uuid;
@@ -27,12 +25,7 @@ class Main extends PluginBase{
 
 	public function onEnable(): void{
 		$capsule = self::newCapsule(Server::getInstance()->getDataPath());
-		$capsule->setAsGlobal();
-
-		$cr = new ConnectionResolver();
-		$cr->addConnection(self::CONN_NAME, $capsule->getConnection());
-		$cr->setDefaultConnection(self::CONN_NAME);
-		Model::setConnectionResolver($cr);
+		ExecutorManager::registerCapsule(self::CONN_NAME, $capsule);
 
 		$this->executorManager = ExecutorManager::create();
 		$this->executorManager->register(MyGlobalExecutor::getInstance());
@@ -60,13 +53,10 @@ class Main extends PluginBase{
 	}
 
 	public static function newCapsule(string $dataPath): Manager{
-		$capsule = new Manager();
-		$capsule->addConnection([
+		return ExecutorManager::newCapsule(self::CONN_NAME, [
 			"driver" => "sqlite",
 			"database" => Path::join($dataPath, "database.sqlite"),
 			"prefix" => "",
-		], self::CONN_NAME);
-		$capsule->getDatabaseManager()->setDefaultConnection(self::CONN_NAME);
-		return $capsule;
+		]);
 	}
 }

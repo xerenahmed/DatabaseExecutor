@@ -19,7 +19,7 @@ GlobalExecutor::getInstance()->save($playerModel);
 DatabaseExecutor requires PHP 8 or later. It also requires the following extensions:
 
 ```bash
-composer require illuminate/database guzzlehttp/promises sof3/await-generator
+composer require illuminate/database:^9.37.0 sof3/await-generator:^3.4.2 guzzlehttp/promises:^1.5 
 ```
 
 ### Install DatabaseExecutor
@@ -55,33 +55,26 @@ In here we will create a base executor instance that will be used to execute que
 Also you use this instance to connect to your database and load your classes.
 
 ```php
-<?php
+use Illuminate\Database\Capsule\Manager;
+
 abstract class MyExecutorThread extends DatabaseExecutorThread{
 
 	/**
 	 * @throws \Exception
 	 */
-	public function createConnection(): Connection{
-            $capsule = new Capsule;
-            
-            $capsule->addConnection([
-                'driver' => 'mysql',
-                'host' => 'localhost',
-                'database' => 'database',
-                'username' => 'root',
-                'password' => 'password',
-                'charset' => 'utf8',
-                'collation' => 'utf8_unicode_ci',
-                'prefix' => '',
-            ]);
-            
-            return $capsule->getConnection();
+	public function createCapsule(): Manager{
+	    // https://github.com/illuminate/database#usage-instructions
+	    return ExecutorManager::newCapsule("plugin-name", [
+			"driver" => "sqlite",
+			"database" => Path::join($dataPath, "database.sqlite"),
+			"prefix" => "",
+		]);
 	}
 
 	public function registerClassLoaders(): void{
 		parent::registerClassLoaders();
 		
-		// Register your vendor autoloaders here
+		// Register your vendor autoloader here
 		require_once $this->dataPath . '/plugins/vendor/autoload.php';
 		
 		// Register dotenv if you use it to load environment variables	
@@ -166,13 +159,13 @@ class Manager extends PluginBase{
 You should set connection resolver in main thread to use models in main thread. And specify the connection name in your model.
 
 ```php
-$capsule = self::newCapsule();
-$capsule->setAsGlobal();
-
-$cr = new ConnectionResolver();
-$cr->addConnection("example", $capsule->getConnection());
-$cr->setDefaultConnection("example");
-Model::setConnectionResolver($cr);
+$capsule =  ExecutorManager::newCapsule("plugin-name", [
+    "driver" => "sqlite",
+    "database" => Path::join($dataPath, "database.sqlite"),
+    "prefix" => "",
+]);
+// Register in connection resolver, so you can use models in main thread
+ExecutorManager::registerCapsule(self::CONN_NAME, $capsule);
 ```
 
 ## Global Executor
@@ -194,12 +187,12 @@ class MyGlobalExecutor extends GlobalExecutor{
 	}
 }
 
-use Illuminate\Database\Connection;
+use Illuminate\Database\Capsule\Manager;
 use xerenahmed\database\global\GlobalExecutorThread;
 
 class MyGlobalExecutorThread extends GlobalExecutorThread{
-	public function createConnection(): Connection{
-		return Main::newCapsule($this->dataPath)->getConnection();
+	public function createCapsule(): Manager{
+		return Main::newCapsule($this->dataPath);
 	}
 }
 ```
@@ -238,7 +231,7 @@ class AdvancedExecutor implements DatabaseExecutorProviderInterface{
 	}
 }
 
-class AdvancedExecutorThread extends RedExecutorThread{
+class AdvancedExecutorThread extends MyExecutorThread{
     public function handle(Connection $connection, array $data): mixed{
         $action = array_shift($data);
 
