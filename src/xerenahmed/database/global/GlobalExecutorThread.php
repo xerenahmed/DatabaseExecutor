@@ -12,16 +12,21 @@ abstract class GlobalExecutorThread extends DatabaseExecutorThread{
 
 	// @internal API
 	public function handle(Connection $connection, array $data): mixed{
-		[$method, $object] = $data;
+		$action = $data[0];
 
-		if ($method === "create") {
-			return $object::create(...$data[2]);
+		if ($action === "raw") {
+			[, $method, $query] = $data;
+			return $connection->{$method}($query);
+		}
+		if ($action === "create") {
+			[, $object, $values] = $data;
+			return $object::create(...$values);
 		}
 
 		/** @var Builder $object */
 		$object->connection = $connection;
 
 		$values = $data[2] ?? [];
-		return $object->{$method}(...$values);
+		return $object->{$action}(...$values);
 	}
 }

@@ -68,6 +68,10 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return yield from $this->createAsync("create", $modelClass, [$attributes]);
 	}
 
+	public function raw(string $method, string $rawQuery): \Generator{
+		return yield from $this->createAsync("raw", $method, $rawQuery);
+	}
+
 	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): \Generator{
 		$baseQuery = $builder->toBase();
 		$baseQuery->connection = null; // @phpstan-ignore-line

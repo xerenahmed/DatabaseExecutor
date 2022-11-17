@@ -9,6 +9,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\thread\Thread;
@@ -49,6 +50,7 @@ abstract class DatabaseExecutorThread extends Thread{
 		\GlobalLogger::get()->info($this->getName() . ' started');
 
 		$capsule = $this->createCapsule();
+		$capsule->setAsGlobal();
 		$connection = $capsule->getConnection();
 		$defaultConnection = $capsule->getDatabaseManager()->getDefaultConnection();
 
