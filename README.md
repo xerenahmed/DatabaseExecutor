@@ -4,7 +4,7 @@ DatabaseExecutor is a virion library for executing SQL queries asynchronously wi
 ```php
 // For example
 $query = PlayerModel::username('xerenahmed');
-$playerModel = GlobalExecutor::getInstance()->first($builder);
+$playerModel = GlobalExecutor::getInstance()->first($query);
 $playerModel->locale = 'en';
 GlobalExecutor::getInstance()->save($playerModel);
 ```
@@ -16,11 +16,13 @@ GlobalExecutor::getInstance()->save($playerModel);
 ## Installation
 
 ### Install Dependencies
-DatabaseExecutor requires PHP 8 or later. It also requires the following extensions:
+DatabaseExecutor requires PHP 8 or later. It also requires the following packages:
 
 ```bash
-composer require illuminate/database:^9.37.0 sof3/await-generator:^3.4.2 guzzlehttp/promises:^1.5 
+composer require illuminate/database:^9.37.0 guzzlehttp/promises:^1.5 
 ```
+
+Make sure you have the [await-generator](https://github.com/SOF3/await-generator) virion. 
 
 ### Install DatabaseExecutor
 Download or clone repository and put it in your virions folder.
