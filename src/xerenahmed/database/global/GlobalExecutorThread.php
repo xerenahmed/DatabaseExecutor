@@ -18,11 +18,13 @@ abstract class GlobalExecutorThread extends DatabaseExecutorThread{
 			[, $method, $query] = $data;
 			return $connection->{$method}($query);
 		}
+
 		if ($action === "create") {
 			[, $object, $values] = $data;
 			return $object::create(...$values);
 		}
 
+		$object = $data[1];
 		/** @var Builder $object */
 		$object->connection = $connection;
 

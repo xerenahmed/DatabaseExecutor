@@ -9,7 +9,6 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
 use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\thread\Thread;
