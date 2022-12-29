@@ -33,7 +33,7 @@ class HandlerQueue extends \Threaded{
 	}
 
 	public function fetch(): ?string{
-		$value = $this->synchronized(function(): ?string{
+		return $this->synchronized(function(): ?string{
 			while($this->queue->count() === 0 && !$this->isKilled()){
 				$this->wait();
 			}
@@ -41,8 +41,6 @@ class HandlerQueue extends \Threaded{
 			$value = $this->queue->shift();
 			return $value !== null ? strval($value) : null;
 		});
-
-		return $value !== null ? strval($value) : null;
 	}
 
 	public function kill(): void{
