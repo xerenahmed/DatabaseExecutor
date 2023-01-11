@@ -39,8 +39,28 @@ return (new PhpCsFixer\Config)
 			'import_functions' => true,
 			'import_classes' => null,
 		],
-		'header_comment' => [
-			'header' => '',
+	'header_comment' => [
+			'comment_type' => 'comment',
+			'header' => <<<BODY
+______         _ __  ___ ____ 
+| ___ \       | |  \/  /  __ \
+| |_/ /___  __| | .  . | /  \/
+|    // _ \/ _` | |\/| | |    
+| |\ \  __/ (_| | |  | | \__/\
+\_| \_\___|\__,_\_|  |_/\____/
+
+Copyright (C) RedMC Network, Inc - All Rights Reserved
+
+You may use, distribute and modify this code under the
+terms of the MIT license, which unfortunately won't be
+written for another century.
+
+Written by xerenahmed <eren@redmc.me>, 2023
+
+@author RedMC Team
+@link https://www.redmc.me/
+BODY,
+			'location' => 'after_open'
 		],
 		'indentation_type' => true,
 		'logical_operators' => true,
