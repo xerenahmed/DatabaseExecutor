@@ -29,6 +29,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\thread\Thread;
@@ -77,6 +78,11 @@ abstract class DatabaseExecutorThread extends Thread{
 		$resolver->addConnection($defaultConnection, $connection);
 		$resolver->setDefaultConnection($defaultConnection);
 		Model::setConnectionResolver($resolver);
+
+		$app = new \Illuminate\Container\Container();
+		$app->instance('db', $capsule->getDatabaseManager());
+		$app->instance('config', $capsule->getDatabaseManager()->getConfig());
+		DB::setFacadeApplication($app);
 
 		$connection->enableQueryLog();
 		while(true){
