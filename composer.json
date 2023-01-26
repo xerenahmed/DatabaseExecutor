@@ -1,19 +1,18 @@
 {
   "name": "xerenahmed/database-executor",
   "type": "project",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "require": {
-    "sof3/await-generator": "^3.4.2",
-    "illuminate/database": "^9.37.0",
-    "guzzlehttp/promises": "^1.5",
     "ext-pthreads": "*"
   },
   "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.10",
+    "guzzlehttp/promises": "^1.5",
+    "illuminate/database": "^9.37.0",
     "pocketmine/pocketmine-mp": "^4.0.0",
     "phpstan/phpstan": "^1.8",
     "phpunit/phpunit": "^9.5",
-    "friendsofphp/php-cs-fixer": "^3.10",
-    "sof3/pharynx": "0.2.2"
+    "sof3/await-generator": "^3.4.2"
   },
   "autoload": {
     "psr-0": {

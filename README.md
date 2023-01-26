@@ -1,4 +1,5 @@
 # DatabaseExecutor
+
 DatabaseExecutor is a virion library for executing SQL queries asynchronously with **Laravel** **models** and **builders**. It's working for 5 months on a production server. Tested with MySQL and Sqlite.
 
 ```php
@@ -16,18 +17,22 @@ GlobalExecutor::getInstance()->save($playerModel);
 ## Installation
 
 ### Install Dependencies
+
 DatabaseExecutor requires PHP 8 or later. It also requires the following packages:
 
 ```bash
-composer require illuminate/database:^9.37.0 guzzlehttp/promises:^1.5 
+composer require illuminate/database:^9.37.0 guzzlehttp/promises:^1.5
 ```
 
-Make sure you have the [await-generator](https://github.com/SOF3/await-generator) virion. 
+Make sure you have the [await-generator](https://github.com/SOF3/await-generator) virion.
 
 ### Install DatabaseExecutor
-Download or clone repository and put it in your virions folder.
 
-## Usage
+- Option 1: Download last build from [poggit](https://poggit.pmmp.io/ci/xerenahmed/DatabaseExecutor/~) and shade in plugin PHAR.
+- Option 2: Clone git repository into your virions folder.
+
+## Usage In a Plugin
+
 There is a example plugin for using DatabaseExecutor. You can find it in the `example` folder.
 
 ### Define a model
@@ -51,9 +56,9 @@ class PlayerModel extends Model{
 }
 ```
 
-### Define your Base Executor Instance
+### Define your Executor Thread
 
-In here we will create a base executor instance that will be used to execute queries.
+In here we will create a base executor instance that will be used to execute queries. This is the Thread side of work.
 Also you use this instance to connect to your database and load your classes.
 
 ```php
@@ -75,68 +80,75 @@ abstract class MyExecutorThread extends DatabaseExecutorThread{
 
 	public function registerClassLoaders(): void{
 		parent::registerClassLoaders();
-		
+
 		// Register your vendor autoloader here
 		require_once $this->dataPath . '/plugins/vendor/autoload.php';
-		
-		// Register dotenv if you use it to load environment variables	
+
+		// Register dotenv if you use it to load environment variables
 	}
 }
 ```
 
-### Define your Executor Instance
+### Define your Executor Provider
 
-In here we will create an executor instance that will be used to execute queries.
+This is the Executor Provider in the main thread. You specify Excetutor Thread with `createThread` and you will create your own function to pass parameters to the Executor Thread.
 
 ```php
 
 class MoneyExecutor implements DatabaseExecutorProviderInterface{
 	use DatabaseExecutorProvider;
 
+    // This is required by DatabaseExecutorProviderInterface
 	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread{
 		return new MoneyExecutorThread($handlerQueue, $notifier);
 	}
 
+    // promise example for add money
 	public function add(string $username, float $money): Promise{
 		return $this->createPromise(strtolower($username), $money);
 	}
-	
-	public function addAsync(string $username, float $money): \Generator{
+
+    // await-generator usage for add money
+	public function add(string $username, float $money): \Generator{
 		return $this->createAsync(strtolower($username), $money);
 	}
+
+    // use one of them according to your need,
+    // these are just example so you don't need to make both for same action
 }
 
+// MoneyExecutorThread.php
+// This specified in MoneyExecutor (Provider) and responsible for handle provider needs.
 class MoneyExecutorThread extends MyExecutorThread{
 	/**
 	 * @param array{string, int} $data
 	 */
 	public function handle(Connection $connection, array $data): int{
+        // we sent username and money so we can destructure array directly
 		[$username, $money] = $data;
-		return PlayerModel::username($username)->update([
-			'money' => $connection->raw('money + ' . $money)
-		]);
+		return PlayerModel::username($username)->increment('money', $money);
 	}
 }
 ```
 
-### Use it
+### Use your Money Executor
 
 ```php
 $executor = MoneyExecutor::getInstance();
 $executor->add('xerenahmed', 1000)->then(function(int $result){
     echo "Updated $result rows";
 });
-$executor->stop();
+$executor->stop(); // stop in onDisable or when you don't need anymore
 ```
 
-### Use with Await Generator
+### Use Money Executor with Await Generator
 
 ```php
 $executor = MoneyExecutor::getInstance();
 Await::f2c(function() use($executor){
     $result = yield from $executor->addAsync('xerenahmed', 1000);
     echo "Updated $result rows";
-    $executor->stop();
+    $executor->stop(); // stop in onDisable or when you don't need anymore
 });
 ```
 
@@ -158,6 +170,7 @@ class Manager extends PluginBase{
 ```
 
 ## Use models in main thread
+
 You should set connection resolver in main thread to use models in main thread. And specify the connection name in your model.
 
 ```php
@@ -167,7 +180,7 @@ $capsule =  ExecutorManager::newCapsule("plugin-name", [
     "prefix" => "",
 ]);
 // Register in connection resolver, so you can use models in main thread
-ExecutorManager::registerCapsule(self::CONN_NAME, $capsule);
+ExecutorManager::registerCapsule('plugin-name', $capsule);
 ```
 
 ## Global Executor
@@ -177,7 +190,9 @@ instance.
 Useful for executing simple queries. You should implement your own 'global' executor if you want to use it. Because it's must be unique per plugin.
 
 ### Implement
+
 ```php
+// MyGlobalExecutor.php
 use xerenahmed\database\global\GlobalExecutor;
 use xerenahmed\database\DatabaseExecutorProvider;
 
@@ -189,6 +204,7 @@ class MyGlobalExecutor extends GlobalExecutor{
 	}
 }
 
+// MyGlobalExecutorThread.php
 use Illuminate\Database\Capsule\Manager;
 use xerenahmed\database\global\GlobalExecutorThread;
 
@@ -196,10 +212,13 @@ class MyGlobalExecutorThread extends GlobalExecutorThread{
 	public function createCapsule(): Manager{
 		return Main::newCapsule($this->dataPath);
 	}
+
+    // that's it!
 }
 ```
 
 ### Usage after implementing
+
 ```php
 Await::f2c(function(){
     $result = yield from MyGlobalExecutor::getInstance()->first(PlayerModel::username('xerenahmed'));
@@ -223,7 +242,7 @@ class AdvancedExecutor implements DatabaseExecutorProviderInterface{
 	public function createThread(HandlerQueue $handlerQueue, SleeperNotifier $notifier): DatabaseExecutorThread{
 		return new AdvancedExecutorThread($handlerQueue, $notifier);
 	}
-	
+
 	public function create(string $founderUsername, string $name, string $description, int $createCost): \Generator{
 		return $this->createAsync(Action::CREATE, strtolower($founderUsername), $name, $description, $createCost);
 	}
@@ -240,21 +259,21 @@ class AdvancedExecutorThread extends MyExecutorThread{
         return match ($action) {
             Action::CREATE => $this->create($connection, ...$data),
             Action::GET_TEAM_MEMBER_MODELS => $this->getTeamMemberModels(...$data),
-            default => throw new \InvalidArgumentException("Invalid action $action")    
-        };  
+            default => throw new \InvalidArgumentException("Invalid action $action")
+        };
     }
-    
+
     public function create(Connection $connection, string $founderUsername, string $name, string $description, int $teamCreateCost): TeamModel{
         $connection->beginTransaction();
         try{
             PlayerModel::player($founderUsername)->update([
                 "money" => $connection->raw("money - {$teamCreateCost}"),
             ]);
-	    	
+
             $team = new TeamModel();
             // Set params
-            $team->save();  
-		    
+            $team->save();
+
             TeamMemberModel::create([
                 "username" => strtolower($founderUsername),
                 "team" => $team->id,
