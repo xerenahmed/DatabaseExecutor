@@ -69,6 +69,10 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return yield from $this->runBuilderMethod($builder, "delete");
 	}
 
+	public function exists(Builder $builder): \Generator{
+		return yield from $this->runBuilderMethod($builder, "exists");
+	}
+
 	/**
 	 * @param array<string, mixed> $values
 	 */
