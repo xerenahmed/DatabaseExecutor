@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace xerenahmed\database\global;
 
+use AnourValar\EloquentSerialize\Facades\EloquentSerializeFacade;
+use AnourValar\EloquentSerialize\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use xerenahmed\database\DatabaseExecutorProviderInterface;
@@ -34,72 +36,52 @@ use function get_class;
  */
 abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 	public function get(Builder $builder): \Generator{
-		$modelClass = get_class($builder->getModel());
-
-		$collection = yield from $this->runBuilderMethod($builder, "get");
-		return $collection->map(function(\stdClass $values) use ($modelClass){
-			/** @var Model $model */
-			$model = new $modelClass();
-
-			return $model->fill((array) $values);
-		});
+		return $this->runBuilderMethod($builder, "get");
 	}
 
 	public function first(Builder $builder): \Generator{
-		$modelClass = get_class($builder->getModel());
-
-		$values = yield from $this->runBuilderMethod($builder, "first");
-		if($values === null){
-			return null;
-		}
-
-		/** @var Model $model */
-		$model = new $modelClass();
-		return $model->fill((array) $values);
+		return $this->runBuilderMethod($builder, "first");
 	}
 
 	/**
 	 * @param array<string, mixed> $values
 	 */
 	public function update(Builder $builder, array $values): \Generator{
-		return yield from $this->runBuilderMethod($builder, "update", [$values]);
+		return $this->runBuilderMethod($builder, "update", [$values]);
 	}
 
 	public function delete(Builder $builder): \Generator{
-		return yield from $this->runBuilderMethod($builder, "delete");
+		return $this->runBuilderMethod($builder, "delete");
 	}
 
 	public function exists(Builder $builder): \Generator{
-		return yield from $this->runBuilderMethod($builder, "exists");
+		return $this->runBuilderMethod($builder, "exists");
 	}
 
 	/**
 	 * @param array<string, mixed> $values
 	 */
 	public function insert(Builder $builder, array $values): \Generator{
-		return yield from $this->runBuilderMethod($builder, "insert", [$values]);
+		return $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
 	public function save(Model $model): \Generator{
 		$model->setConnection(null);
-		return yield from $this->createAsync("save", $model);
+		return $this->createAsync("save", $model);
 	}
 
 	/**
 	 * @param array<string, mixed> $attributes
 	 */
 	public function create(string $modelClass, array $attributes): \Generator{
-		return yield from $this->createAsync("create", $modelClass, [$attributes]);
+		return $this->createAsync("create", $modelClass, [$attributes]);
 	}
 
 	public function raw(string $method, string $rawQuery): \Generator{
-		return yield from $this->createAsync("raw", $method, $rawQuery);
+		return $this->createAsync("raw", $method, $rawQuery);
 	}
 
 	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): \Generator{
-		$baseQuery = $builder->toBase();
-		$baseQuery->connection = null; // @phpstan-ignore-line
-
-		return yield from $this->createAsync($method, $baseQuery, ...$values);
+		return $this->createAsync($method, (new Service)->serialize($builder), ...$values);
 	}
 }

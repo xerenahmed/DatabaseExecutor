@@ -24,8 +24,9 @@ declare(strict_types=1);
 
 namespace xerenahmed\database\global;
 
+use AnourValar\EloquentSerialize\Service;
 use Illuminate\Database\Connection;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use xerenahmed\database\DatabaseExecutorThread;
 
 abstract class GlobalExecutorThread extends DatabaseExecutorThread{
@@ -44,11 +45,15 @@ abstract class GlobalExecutorThread extends DatabaseExecutorThread{
 			return $object::create(...$values);
 		}
 
-		$object = $data[1];
-		/** @var Builder $object */
-		$object->connection = $connection;
+		if ($action === "save") {
+			/** @var Model $model */
+			[, $model] = $data;
+			return $model->save();
+		}
 
+		// $data[1] is serialized Eloquent\Builder except above situations
+		$builder = (new Service())->unserialize($data[1]);
 		$values = $data[2] ?? [];
-		return $object->{$action}(...$values);
+		return $builder->{$action}(...$values);
 	}
 }

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace xerenahmed\database\global;
 
+use AnourValar\EloquentSerialize\Service;
 use GuzzleHttp\Promise\Promise;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -37,32 +38,11 @@ use function get_class;
 abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterface {
 
 	public function get(Builder $builder): Promise{
-		$modelClass = get_class($builder->getModel());
-
-		// @phpstan-ignore-next-line
-		return $this->runBuilderMethod($builder, "get")->then(function(Collection $collection) use ($modelClass){
-			return $collection->map(function(\stdClass $values) use ($modelClass){
-				/** @var Model $model */
-				$model = new $modelClass();
-
-				return $model->fill((array) $values);
-			});
-		});
+		return $this->runBuilderMethod($builder, "get");
 	}
 
 	public function first(Builder $builder): Promise{
-		$modelClass = get_class($builder->getModel());
-
-		// @phpstan-ignore-next-line
-		return $this->runBuilderMethod($builder, "first")->then(function(?\stdClass $values) use ($modelClass){
-			if($values === null){
-				return null;
-			}
-
-			/** @var Model $model */
-			$model = new $modelClass();
-			return $model->fill((array) $values);
-		});
+		return $this->runBuilderMethod($builder, "first");
 	}
 
 	/**
@@ -74,6 +54,10 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 
 	public function delete(Builder $builder): Promise{
 		return $this->runBuilderMethod($builder, "delete");
+	}
+
+	public function exists(Builder $builder): Promise{
+		return $this->runBuilderMethod($builder, "exists");
 	}
 
 	/**
@@ -96,9 +80,6 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 	}
 
 	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): Promise{
-		$baseQuery = $builder->toBase();
-		$baseQuery->connection = null; // @phpstan-ignore-line
-
-		return $this->createPromise($method, $baseQuery, ...$values);
+		return $this->createPromise($method, (new Service)->serialize($builder), ...$values);
 	}
 }
