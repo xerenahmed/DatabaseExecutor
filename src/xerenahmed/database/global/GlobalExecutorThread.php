@@ -45,10 +45,10 @@ abstract class GlobalExecutorThread extends DatabaseExecutorThread{
 			return $object::create(...$values);
 		}
 
-		if ($action === "save") {
+		if ($action === "model-operation") {
 			/** @var Model $model */
-			[, $model] = $data;
-			return $model->save();
+			[, $model, $operation, $values] = $data;
+			return $model->{$operation}(...$values);
 		}
 
 		// $data[1] is serialized Eloquent\Builder except above situations

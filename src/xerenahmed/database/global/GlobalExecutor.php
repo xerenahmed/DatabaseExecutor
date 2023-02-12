@@ -66,8 +66,16 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 	}
 
 	public function save(Model $model): \Generator{
+		return $this->modelOperation($model, 'save');
+	}
+
+	public function updateModel(Model $model, array $values): \Generator{
+		return $this->modelOperation($model, 'update', [$values]);
+	}
+
+	public function modelOperation(Model $model, string $operation, array $values = []): \Generator{
 		$model->setConnection(null);
-		return $this->createAsync("save", $model);
+		return $this->createAsync("model-operation", $model, $operation, $values);
 	}
 
 	/**
