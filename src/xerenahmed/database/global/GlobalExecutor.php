@@ -24,17 +24,16 @@ declare(strict_types=1);
 
 namespace xerenahmed\database\global;
 
-use AnourValar\EloquentSerialize\Facades\EloquentSerializeFacade;
 use AnourValar\EloquentSerialize\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use xerenahmed\database\DatabaseExecutorProviderInterface;
-use function get_class;
 
 /**
  * @mixin DatabaseExecutorProviderInterface
  */
 abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
+
 	public function get(Builder $builder): \Generator{
 		return $this->runBuilderMethod($builder, "get");
 	}
@@ -65,6 +64,10 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
+	public function refresh(Model $model): \Generator{
+		return $this->modelOperation($model, 'refresh');
+	}
+
 	public function save(Model $model): \Generator{
 		return $this->modelOperation($model, 'save');
 	}
@@ -73,7 +76,7 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return $this->modelOperation($model, 'update', [$values]);
 	}
 
-	public function modelOperation(Model $model, string $operation, array $values = []): \Generator{
+	public function modelOperation(Model|HasMany $model, string $operation, array $values = []): \Generator{
 		$model->setConnection(null);
 		return $this->createAsync("model-operation", $model, $operation, $values);
 	}
@@ -90,6 +93,6 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 	}
 
 	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): \Generator{
-		return $this->createAsync($method, (new Service)->serialize($builder), ...$values);
+		return $this->createAsync($method, (new Service())->serialize($builder), ...$values);
 	}
 }

@@ -28,9 +28,7 @@ use AnourValar\EloquentSerialize\Service;
 use GuzzleHttp\Promise\Promise;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use xerenahmed\database\DatabaseExecutorProviderInterface;
-use function get_class;
 
 /**
  * @mixin DatabaseExecutorProviderInterface
@@ -67,9 +65,21 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 		return $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
+	public function refresh(Model $model): Promise{
+		return $this->modelOperation($model, 'refresh');
+	}
+
 	public function save(Model $model): Promise{
+		return $this->modelOperation($model, 'save');
+	}
+
+	public function updateModel(Model $model, array $values): Promise{
+		return $this->modelOperation($model, 'update', [$values]);
+	}
+
+	public function modelOperation(Model $model, string $operation, array $values = []): Promise{
 		$model->setConnection(null);
-		return $this->createPromise("save", $model);
+		return $this->createPromise("model-operation", $model, $operation, $values);
 	}
 
 	/**
@@ -79,7 +89,11 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 		return $this->createPromise("create", $modelClass, [$attributes]);
 	}
 
+	public function raw(string $method, string $rawQuery): Promise{
+		return $this->createPromise("raw", $method, $rawQuery);
+	}
+
 	public function runBuilderMethod(Builder $builder, string $method, mixed ...$values): Promise{
-		return $this->createPromise($method, (new Service)->serialize($builder), ...$values);
+		return $this->createPromise($method, (new Service())->serialize($builder), ...$values);
 	}
 }

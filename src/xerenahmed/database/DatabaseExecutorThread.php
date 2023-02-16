@@ -106,6 +106,7 @@ abstract class DatabaseExecutorThread extends Thread{
 				$result = $this->handle($connection, $data);
 			}catch(\Exception $e){
 				$error = $e;
+				\GlobalLogger::get()->logException($e);
 			}
 
 			$logCountsNew = count($connection->getQueryLog());
