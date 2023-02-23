@@ -27,6 +27,8 @@ namespace xerenahmed\database\global;
 use AnourValar\EloquentSerialize\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use xerenahmed\database\DatabaseExecutorProviderInterface;
 
 /**
@@ -64,19 +66,19 @@ abstract class GlobalExecutor implements DatabaseExecutorProviderInterface{
 		return $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
-	public function refresh(Model $model): \Generator{
+	public function refresh(Relation|Model $model): \Generator{
 		return $this->modelOperation($model, 'refresh');
 	}
 
-	public function save(Model $model): \Generator{
+	public function save(Relation|Model $model): \Generator{
 		return $this->modelOperation($model, 'save');
 	}
 
-	public function updateModel(Model $model, array $values): \Generator{
+	public function updateModel(Relation|Model $model, array $values): \Generator{
 		return $this->modelOperation($model, 'update', [$values]);
 	}
 
-	public function modelOperation(Model|HasMany $model, string $operation, array $values = []): \Generator{
+	public function modelOperation(Relation|Model $model, string $operation, array $values = []): \Generator{
 		$model->setConnection(null);
 		return $this->createAsync("model-operation", $model, $operation, $values);
 	}

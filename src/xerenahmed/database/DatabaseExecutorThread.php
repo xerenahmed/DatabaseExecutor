@@ -106,7 +106,6 @@ abstract class DatabaseExecutorThread extends Thread{
 				$result = $this->handle($connection, $data);
 			}catch(\Exception $e){
 				$error = $e;
-				\GlobalLogger::get()->logException($e);
 			}
 
 			$logCountsNew = count($connection->getQueryLog());
@@ -189,6 +188,9 @@ abstract class DatabaseExecutorThread extends Thread{
 			"23000", "22003"
 		], true); // duplicate entry, out of range value
 		\GlobalLogger::get()->{$isErrorImportant ? 'error' : 'debug'}($errorLogMessage);
+		if ($isErrorImportant) {
+			\GlobalLogger::get()->logException($e);
+		}
 	}
 
 	/**

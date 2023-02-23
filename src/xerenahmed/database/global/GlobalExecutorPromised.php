@@ -65,19 +65,19 @@ abstract class GlobalExecutorPromised implements DatabaseExecutorProviderInterfa
 		return $this->runBuilderMethod($builder, "insert", [$values]);
 	}
 
-	public function refresh(Model $model): Promise{
+	public function refresh(Relation|Model $model): Promise{
 		return $this->modelOperation($model, 'refresh');
 	}
 
-	public function save(Model $model): Promise{
+	public function save(Relation|Model $model): Promise{
 		return $this->modelOperation($model, 'save');
 	}
 
-	public function updateModel(Model $model, array $values): Promise{
+	public function updateModel(Relation|Model $model, array $values): Promise{
 		return $this->modelOperation($model, 'update', [$values]);
 	}
 
-	public function modelOperation(Model $model, string $operation, array $values = []): Promise{
+	public function modelOperation(Relation|Model $model, string $operation, array $values = []): Promise{
 		$model->setConnection(null);
 		return $this->createPromise("model-operation", $model, $operation, $values);
 	}
