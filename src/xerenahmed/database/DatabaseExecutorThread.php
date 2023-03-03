@@ -189,7 +189,7 @@ abstract class DatabaseExecutorThread extends Thread{
 		], true); // duplicate entry, out of range value
 		\GlobalLogger::get()->{$isErrorImportant ? 'error' : 'debug'}($errorLogMessage);
 		if ($isErrorImportant) {
-			\GlobalLogger::get()->logException($e);
+			\GlobalLogger::get()->logException($error);
 		}
 	}
 
