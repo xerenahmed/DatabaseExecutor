@@ -48,6 +48,7 @@ use function unserialize;
 
 abstract class DatabaseExecutorThread extends Thread{
 	protected string $dataPath;
+	protected string $pluginPath;
 	protected \Threaded $executor;
 	protected \ThreadedLogger $logger;
 	protected string $logPrefix = "DatabaseExecutor";
@@ -58,6 +59,7 @@ abstract class DatabaseExecutorThread extends Thread{
 		public SleeperNotifier $notifier
 	){
 		$this->executor = new \Threaded();
+		$this->pluginPath = Server::getInstance()->getPluginPath();
 		$this->dataPath = Server::getInstance()->getDataPath();
 		$this->logger = Server::getInstance()->getLogger();
 		$this->name = parent::getThreadName();
